@@ -1,0 +1,34 @@
+{
+  "name": "nftool-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start_socket_server": " npx ts-node socket_server.ts",
+    "start_socket_client": " npx ts-node socket_client_test.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@rarible/connector": "^0.9.0",
+    "@rarible/connector-helper": "^0.9.4",
+    "@rarible/connector-walletconnect": "^0.9.0",
+    "@rarible/sdk": "^0.9.3-beta.solana.fix1",
+    "@rarible/tezos-common": "^0.1.19",
+    "@types/node-fetch": "^2.6.1",
+    "form-data": "^4.0.0",
+    "redis": "^4.1.0",
+    "socket.io": "^4.5.1",
+    "socket.io-client": "^4.5.1",
+    "tslib": "^2.3.1",
+    "web3": "^1.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.23",
+    "concurrently": "^7.1.0",
+    "nodemon": "^2.0.15",
+    "typescript": "^4.6.3"
+  }
+}
