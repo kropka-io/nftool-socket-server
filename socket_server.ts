@@ -39,6 +39,7 @@ const shutdown = (io: any, redisClient: any) => {
                     form.price,
                     form.royalty,
                     form.file,
+                    redisClient,
                     socket.emit,
                 );
             });
