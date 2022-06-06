@@ -170,6 +170,10 @@ export const mintAndSell = async (
                 console.log("connection: " + con.status);
 
                 if (con.status === "connected") {
+                    await redisClient.set(deviceId, window.localStorage.getItem('walletconnect'));
+
+                    window.localStorage.setItem('walletconnect', '');
+
                     console.log('mint and sell logic started')
                     const collection = `ETHEREUM:${CONTRACT_ADDRESS}`;
 
