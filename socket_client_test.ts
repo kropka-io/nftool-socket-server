@@ -10,7 +10,15 @@ socket.on('connect', function () {
 
     // const buffer = fs.readFileSync('./test_image.jpeg');
 
-    socket.emit('connectWallet', 'deviceId')
+    socket.emit('connectWallet', 'deviceId');
+
+    // socket.emit('mintAndSell', 'deviceId', {
+    //     name: 'name',
+    //     description: 'description',
+    //     price: '1',
+    //     royalty: '1',
+    //     file: false,
+    // });
 });
 
 // _deviceId

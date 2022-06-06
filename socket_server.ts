@@ -23,6 +23,8 @@ const shutdown = (io: any, redisClient: any) => {
 
     const io = new Server(3000, { /* options */ });
 
+    S.setup();
+
     io.on("connection", async (socket) => {
         try {
             console.log('server side connected');

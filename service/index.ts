@@ -5,6 +5,7 @@ import {toContractAddress, toUnionAddress } from "@rarible/types";
 import {PrepareMintRequest} from "@rarible/sdk/build/types/nft/mint/prepare-mint-request.type";
 import {mapEthereumWallet} from '@rarible/connector-helper';
 
+const { LocalStorage } = require('node-localstorage');
 const FormData = require('form-data');
 
 const API_KEY = 'bd0d345d2b0565a670f5';
@@ -20,6 +21,29 @@ enum Statuses {
     ACCOUNT_CONNECTED = 'ACCOUNT_CONNECTED',
     ACCOUNT_DISCONNECTED = 'ACCOUNT_DISCONNECTED',
 };
+
+export const setup = () => {
+    // Setup
+    //@ts-ignore
+    global.FormData = FormData;
+    //@ts-ignore
+    global["window"] = {
+        //@ts-ignore
+        fetch: fetch,
+
+        //@ts-ignore
+        localStorage: new LocalStorage('./scratch'),
+        //@ts-ignore
+        dispatchEvent: () => {
+        },
+        addEventListener: () => {
+        }
+    };
+    //@ts-ignore
+    global.CustomEvent = function CustomEvent() {
+        return;
+    };
+}
 
 export const getSocketStatusChannel = (deviceId: string): string => {
     return `${SOCKET_STATUS_CHANEL}_${deviceId}`;
@@ -94,7 +118,9 @@ export const connectWallet = async (deviceId: string, redisClient: any, socket: 
             console.log("connection: " + con.status);
 
             if (con.status === "connected") {
-                await redisClient.set(deviceId, 'conected');
+                await redisClient.set(deviceId, window.localStorage.getItem('walletconnect'));
+
+                window.localStorage.setItem('walletconnect', '');
 
                 socket.emit(socketChannel, {
                     status: Statuses.ACCOUNT_CONNECTED,
@@ -112,6 +138,8 @@ export const connectWallet = async (deviceId: string, redisClient: any, socket: 
 export const disconnectWallet = async (deviceId: string, redisClient: any, socket: any) => {
     await redisClient.del(deviceId);
 
+    window.localStorage.setItem('walletconnect', '');
+
     const socketChannel = getSocketStatusChannel(deviceId);
 
     socket.emit(socketChannel, {
@@ -126,8 +154,13 @@ export const mintAndSell = async (
     price: string = '1',
     royalty: string = '0',
     file: any,
+    redisClient: any,
     socket: any,
 ) => {
+    const connection = await redisClient.get(deviceId);
+
+    window.localStorage.setItem('walletconnect', connection);
+
     const connector = await getConnector(deviceId, socket);
 
     const socketChannel = getSocketStatusChannel(deviceId);
@@ -141,7 +174,11 @@ export const mintAndSell = async (
                     const collection = `ETHEREUM:${CONTRACT_ADDRESS}`;
 
                     // @ts-ignore
-                    const sdk = createRaribleSdk(con.connection.wallet, "prod");
+                    const sdk = createRaribleSdk(con.connection.wallet, "prod", {
+                        apiClientParams: {
+                            fetchApi: fetch,
+                        },
+                    });
                     const tokenId = await sdk.nft.generateTokenId({
                         collection: toContractAddress(collection),
                         minter: toUnionAddress(`ETHEREUM:${con.connection.address}`),
