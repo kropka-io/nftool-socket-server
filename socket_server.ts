@@ -83,4 +83,6 @@ const shutdown = (io: any, redisClient: any) => {
         console.info('SIGINT. Closing process...');
         shutdown(io, redisClient);
     });
+
+    console.log(`Socket server is started`);
 })()
