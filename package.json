@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start_socket_server": " npx ts-node socket_server.ts",
-    "start_socket_client": " npx ts-node socket_client_test.ts"
+    "start": "npx ts-node socket_server.ts",
+    "start_socket_server": "npx ts-node socket_server.ts",
+    "start_socket_client": "npx ts-node socket_client_test.ts"
   },
   "keywords": [],
   "author": "",
