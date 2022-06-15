@@ -21,7 +21,8 @@ const shutdown = (io: any, redisClient: any) => {
 
     redisClient.on('error', (err) => console.log('Redis Client Error', err));
 
-    const io = new Server(3000, { /* options */ });
+    // @ts-ignore
+    const io = new Server(process.env.PORT || 3000, { /* options */ });
 
     S.setup();
 
