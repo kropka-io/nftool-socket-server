@@ -17,7 +17,7 @@ const shutdown = (io: any, redisClient: any) => {
 }
 
 (async () => {
-    const redisClient = createClient();
+    const redisClient = createClient({ url: process.env.REDIS_URI });
 
     redisClient.on('error', (err) => console.log('Redis Client Error', err));
 

@@ -19,6 +19,7 @@
     "@rarible/sdk": "^0.9.3-beta.solana.fix1",
     "@rarible/tezos-common": "^0.1.19",
     "@types/node-fetch": "^2.6.1",
+    "dotenv": "^16.0.1",
     "form-data": "^4.0.0",
     "node-localstorage": "^2.2.1",
     "redis": "^4.1.0",
