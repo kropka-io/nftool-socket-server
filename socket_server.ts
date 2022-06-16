@@ -1,6 +1,7 @@
-import { Server } from "socket.io";
+// import Server from "socket.io";
 import { createClient } from 'redis';
 import * as S from './service';
+const Server = require('socket.io');
 
 const shutdown = (io: any, redisClient: any) => {
     try {
@@ -17,11 +18,12 @@ const shutdown = (io: any, redisClient: any) => {
 }
 
 (async () => {
-    const redisClient = createClient();
+    const redisClient = createClient({ url: process.env.REDIS_URL });
 
     redisClient.on('error', (err) => console.log('Redis Client Error', err));
 
-    const io = new Server(3000, { /* options */ });
+    // @ts-ignore
+    const io = new Server(process.env.PORT || 3000, { /* options */ });
 
     S.setup();
 
@@ -83,4 +85,7 @@ const shutdown = (io: any, redisClient: any) => {
         console.info('SIGINT. Closing process...');
         shutdown(io, redisClient);
     });
+
+    console.log(`Socket server is started`);
 })()
+

@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start_socket_server": " npx ts-node socket_server.ts",
-    "start_socket_client": " npx ts-node socket_client_test.ts"
+    "start": "npx ts-node socket_server.ts",
+    "start_socket_server": "npx ts-node socket_server.ts",
+    "start_socket_client": "npx ts-node socket_client_test.ts"
   },
   "keywords": [],
   "author": "",
@@ -18,11 +19,12 @@
     "@rarible/sdk": "^0.9.9",
     "@rarible/tezos-common": "^0.1.19",
     "@types/node-fetch": "^2.6.1",
+    "dotenv": "^16.0.1",
     "form-data": "^4.0.0",
     "node-localstorage": "^2.2.1",
     "redis": "^4.1.0",
-    "socket.io": "^4.5.1",
-    "socket.io-client": "^4.5.1",
+    "socket.io": "^2.4.1",
+    "socket.io-client": "^2.4.0",
     "tslib": "^2.3.1",
     "web3": "^1.5.0"
   },
