@@ -1,6 +1,7 @@
-import { Server } from "socket.io";
+// import Server from "socket.io";
 import { createClient } from 'redis';
 import * as S from './service';
+const Server = require('socket.io');
 
 const shutdown = (io: any, redisClient: any) => {
     try {
