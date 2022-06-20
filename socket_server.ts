@@ -1,7 +1,7 @@
 // import Server from "socket.io";
-import { createClient } from 'redis';
 import * as S from './service';
 const Server = require('socket.io');
+const redis = require("redis");
 
 const shutdown = (io: any, redisClient: any) => {
     try {
@@ -18,7 +18,7 @@ const shutdown = (io: any, redisClient: any) => {
 }
 
 (async () => {
-    const redisClient = createClient({ url: process.env.REDIS_URL });
+    const redisClient = redis.createClient({ url: process.env.REDIS_URL });
 
     redisClient.on('error', (err) => console.log('Redis Client Error', err));
 
@@ -73,7 +73,7 @@ const shutdown = (io: any, redisClient: any) => {
         console.log('server side disconnect')
     });
 
-    await redisClient.connect();
+    // await redisClient.connect();
     await io.listen(3001);
 
     process.on('unhandledRejection', (err) => {
