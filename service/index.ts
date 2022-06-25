@@ -195,12 +195,12 @@ export const mintAndSell = async (
                     };
                     const mintResponse = await sdk.nft.mintAndSell(mintRequest);
 
-                    const ipfsImgUrl = await uploadFileToIpfs(file);
+                    // const ipfsImgUrl = await uploadFileToIpfs(file);
 
                     const jsonImgUrl = await uploadJsonToIpfs(
                         name,
                         description,
-                        ipfsImgUrl,
+                        file,
                         tokenId?.tokenId,
                     )
 
