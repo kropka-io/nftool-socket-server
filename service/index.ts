@@ -22,6 +22,7 @@ enum Statuses {
     MINTED_AND_PUT_ON_SELL = 'MINTED_AND_PUT_ON_SELL',
     ACCOUNT_CONNECTED = 'ACCOUNT_CONNECTED',
     ACCOUNT_DISCONNECTED = 'ACCOUNT_DISCONNECTED',
+    LAUNCH_WALLET = 'LAUNCH_WALLET',
 };
 
 export const setup = () => {
@@ -203,6 +204,7 @@ export const mintAndSell = async (
                         },
                     });
 
+                    socket.emit(socketChannel, { status: Statuses.LAUNCH_WALLET });
                     console.log('ipfs url ' + jsonImgUrl);
                     console.log(`the price is ${parseFloat(price)}`);
                     console.log(`the royalties is ${parseFloat(royalty)}`);
