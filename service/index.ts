@@ -4,6 +4,7 @@ import {WalletConnectConnectionProvider} from "@rarible/connector-walletconnect"
 import {toContractAddress, toUnionAddress } from "@rarible/types";
 import {PrepareMintRequest} from "@rarible/sdk/build/types/nft/mint/prepare-mint-request.type";
 import {mapEthereumWallet} from '@rarible/connector-helper';
+import {createRaribleSdk} from '@rarible/sdk';
 
 const { LocalStorage } = require('node-localstorage');
 const FormData = require('form-data');
@@ -202,6 +203,7 @@ export const mintAndSell = async (
                         name,
                         description,
                         file,
+                        // @ts-ignore
                         tokenId?.tokenId,
                     )
 
