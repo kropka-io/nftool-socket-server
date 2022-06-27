@@ -121,7 +121,7 @@ export const connectWallet = async (deviceId: string, redisClient: any, socket: 
                 console.log('local storage after connect' + JSON.stringify(window.localStorage.getItem('walletconnect')))
                 await redisClient.set(deviceId, JSON.stringify(window.localStorage.getItem('walletconnect')));
 
-                window.localStorage.setItem('walletconnect', '');
+                // window.localStorage.setItem('walletconnect', '');
 
                 socket.emit(socketChannel, {
                     status: Statuses.ACCOUNT_CONNECTED,
@@ -173,7 +173,7 @@ export const mintAndSell = async (
                 if (con.status === "connected") {
                     await redisClient.set(deviceId, window.localStorage.getItem('walletconnect'));
 
-                    window.localStorage.setItem('walletconnect', '');
+                    // window.localStorage.setItem('walletconnect', '');
 
                     console.log('mint and sell logic started')
                     const collection = `ETHEREUM:${CONTRACT_ADDRESS}`;
