@@ -4,6 +4,7 @@ import {WalletConnectConnectionProvider} from "@rarible/connector-walletconnect"
 import {toContractAddress, toUnionAddress } from "@rarible/types";
 import {PrepareMintRequest} from "@rarible/sdk/build/types/nft/mint/prepare-mint-request.type";
 import {mapEthereumWallet} from '@rarible/connector-helper';
+import {createRaribleSdk} from '@rarible/sdk';
 
 const { LocalStorage } = require('node-localstorage');
 const FormData = require('form-data');
@@ -118,9 +119,10 @@ export const connectWallet = async (deviceId: string, redisClient: any, socket: 
             console.log("connection: " + con.status);
 
             if (con.status === "connected") {
-                await redisClient.set(deviceId, window.localStorage.getItem('walletconnect'));
+                console.log('local storage after connect' + JSON.stringify(window.localStorage.getItem('walletconnect')))
+                await redisClient.set(deviceId, JSON.stringify(window.localStorage.getItem('walletconnect')));
 
-                window.localStorage.setItem('walletconnect', '');
+                // window.localStorage.setItem('walletconnect', '');
 
                 socket.emit(socketChannel, {
                     status: Statuses.ACCOUNT_CONNECTED,
@@ -152,14 +154,14 @@ export const mintAndSell = async (
     name: string = 'Default name',
     description: string = 'Default description',
     price: string = '1',
-    royalty: string = '0',
+    royalty: string = '1',
     file: any,
     redisClient: any,
     socket: any,
 ) => {
     const connection = await redisClient.get(deviceId);
 
-    window.localStorage.setItem('walletconnect', connection);
+    // window.localStorage.setItem('walletconnect', connection);
 
     const connector = await getConnector(deviceId, socket);
 
@@ -172,7 +174,7 @@ export const mintAndSell = async (
                 if (con.status === "connected") {
                     await redisClient.set(deviceId, window.localStorage.getItem('walletconnect'));
 
-                    window.localStorage.setItem('walletconnect', '');
+                    // window.localStorage.setItem('walletconnect', '');
 
                     console.log('mint and sell logic started')
                     const collection = `ETHEREUM:${CONTRACT_ADDRESS}`;
@@ -195,12 +197,13 @@ export const mintAndSell = async (
                     };
                     const mintResponse = await sdk.nft.mintAndSell(mintRequest);
 
-                    const ipfsImgUrl = await uploadFileToIpfs(file);
+                    // const ipfsImgUrl = await uploadFileToIpfs(file);
 
                     const jsonImgUrl = await uploadJsonToIpfs(
                         name,
                         description,
-                        ipfsImgUrl,
+                        file,
+                        // @ts-ignore
                         tokenId?.tokenId,
                     )
 
@@ -228,7 +231,7 @@ export const mintAndSell = async (
                         ],
                         royalties: [{
                             account: toUnionAddress(`ETHEREUM:${con.connection.address}`),
-                            value: parseFloat(royalty) * 100 || 0,
+                            value: parseFloat(royalty) * 100 || 1,
                         }],
                         currency: {
                             "@type": "ETH",
@@ -245,6 +248,7 @@ export const mintAndSell = async (
                     });
                 }
             } catch (e) {
+                console.dir(e);
                 socket.emit(socketChannel, {
                     status: Statuses.MINT_AND_SELL_ERROR,
                     message: {
