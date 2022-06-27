@@ -33,14 +33,14 @@ const shutdown = (io: any, redisClient: any) => {
 
             socket.on('mintAndSell', async (...args) => {
                 const [deviceId, form] = args;
-
+                const params = JSON.parse(form);
                 await S.mintAndSell(
                     deviceId,
-                    form.name,
-                    form.description,
-                    form.price,
-                    form.royalty,
-                    form.file,
+                    params.name,
+                    params.description,
+                    params.price,
+                    params.royalty,
+                    params.file,
                     redisClient,
                     socket,
                 );

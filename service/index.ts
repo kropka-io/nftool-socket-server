@@ -154,7 +154,7 @@ export const mintAndSell = async (
     name: string = 'Default name',
     description: string = 'Default description',
     price: string = '1',
-    royalty: string = '0',
+    royalty: string = '1',
     file: any,
     redisClient: any,
     socket: any,
@@ -231,7 +231,7 @@ export const mintAndSell = async (
                         ],
                         royalties: [{
                             account: toUnionAddress(`ETHEREUM:${con.connection.address}`),
-                            value: parseFloat(royalty) * 100 || 0,
+                            value: parseFloat(royalty) * 100 || 1,
                         }],
                         currency: {
                             "@type": "ETH",
