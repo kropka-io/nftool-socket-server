@@ -246,6 +246,7 @@ export const mintAndSell = async (
                     });
                 }
             } catch (e) {
+                console.dir(e);
                 socket.emit(socketChannel, {
                     status: Statuses.MINT_AND_SELL_ERROR,
                     message: {
