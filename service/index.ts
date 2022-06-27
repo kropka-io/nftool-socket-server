@@ -118,7 +118,8 @@ export const connectWallet = async (deviceId: string, redisClient: any, socket: 
             console.log("connection: " + con.status);
 
             if (con.status === "connected") {
-                await redisClient.set(deviceId, window.localStorage.getItem('walletconnect'));
+                console.log('local storage after connect' + JSON.stringify(window.localStorage.getItem('walletconnect')))
+                await redisClient.set(deviceId, JSON.stringify(window.localStorage.getItem('walletconnect')));
 
                 window.localStorage.setItem('walletconnect', '');
 
