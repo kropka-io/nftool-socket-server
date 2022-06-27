@@ -13,6 +13,7 @@ const API_KEY = 'bd0d345d2b0565a670f5';
 const SECRET_API_KEY = 'c07b7d17a545a96a7646a83a6459784afe97255027695b85f308b66721ad67f9';
 const CONTRACT_ADDRESS = '0xc9154424B823b10579895cCBE442d41b9Abd96Ed';
 const SOCKET_STATUS_CHANEL = 'statuses';
+const STORAGE_KEY = 'rarible_zalupa';
 
 enum Statuses {
     CONNECT_ACCOUNT_LAUNCHED = 'CONNECT_ACCOUNT_LAUNCHED',
@@ -77,6 +78,7 @@ export const getConnector = async (deviceId: string, socket: any) => {
         },
         chainId: 1,
         qrcode: true,
+        storageId: `${STORAGE_KEY}_${deviceId}`,
         qrcodeModal: {
             async open(uri: string, cb: any, opts?: any) {
                 socket.emit(socketChannel, {
@@ -110,7 +112,7 @@ export const getConnector = async (deviceId: string, socket: any) => {
     return Connector.create(walletConnect);
 };
 
-export const connectWallet = async (deviceId: string, redisClient: any, socket: any) => {
+export const connectWallet = async (deviceId: string, socket: any) => {
     const connector = await getConnector(deviceId, socket);
 
     const socketChannel = getSocketStatusChannel(deviceId);
@@ -119,9 +121,7 @@ export const connectWallet = async (deviceId: string, redisClient: any, socket: 
             console.log("connection: " + con.status);
 
             if (con.status === "connected") {
-                console.log('local storage after connect' + JSON.stringify(window.localStorage.getItem('walletconnect')))
-                await redisClient.set(deviceId, JSON.stringify(window.localStorage.getItem('walletconnect')));
-
+                console.log('local storage after connect' + JSON.stringify(window.localStorage.getItem(`${STORAGE_KEY}_${deviceId}`)))
                 // window.localStorage.setItem('walletconnect', '');
 
                 socket.emit(socketChannel, {
@@ -137,10 +137,8 @@ export const connectWallet = async (deviceId: string, redisClient: any, socket: 
     await connect(connector)
 };
 
-export const disconnectWallet = async (deviceId: string, redisClient: any, socket: any) => {
-    await redisClient.del(deviceId);
-
-    window.localStorage.setItem('walletconnect', '');
+export const disconnectWallet = async (deviceId: string, socket: any) => {
+    window.localStorage.setItem(`${STORAGE_KEY}_${deviceId}`, '');
 
     const socketChannel = getSocketStatusChannel(deviceId);
 
@@ -156,13 +154,8 @@ export const mintAndSell = async (
     price: string = '1',
     royalty: string = '1',
     file: any,
-    redisClient: any,
     socket: any,
 ) => {
-    const connection = await redisClient.get(deviceId);
-
-    // window.localStorage.setItem('walletconnect', connection);
-
     const connector = await getConnector(deviceId, socket);
 
     const socketChannel = getSocketStatusChannel(deviceId);
@@ -172,10 +165,6 @@ export const mintAndSell = async (
                 console.log("connection: " + con.status);
 
                 if (con.status === "connected") {
-                    await redisClient.set(deviceId, window.localStorage.getItem('walletconnect'));
-
-                    // window.localStorage.setItem('walletconnect', '');
-
                     console.log('mint and sell logic started')
                     const collection = `ETHEREUM:${CONTRACT_ADDRESS}`;
 

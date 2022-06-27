@@ -1,12 +1,10 @@
 // import Server from "socket.io";
 import * as S from './service';
 const Server = require('socket.io');
-const redis = require("redis");
 
-const shutdown = (io: any, redisClient: any) => {
+const shutdown = (io: any) => {
     try {
         io.close();
-        redisClient.quit();
         console.log('Closed redis');
         console.log('Closed postgres connections');
     } catch (err) {
@@ -18,10 +16,6 @@ const shutdown = (io: any, redisClient: any) => {
 }
 
 (async () => {
-    const redisClient = redis.createClient({ url: process.env.REDIS_URL });
-
-    redisClient.on('error', (err) => console.log('Redis Client Error', err));
-
     // @ts-ignore
     const io = new Server(process.env.PORT || 3000, { /* options */ });
 
@@ -41,7 +35,6 @@ const shutdown = (io: any, redisClient: any) => {
                     params.price,
                     params.royalty,
                     params.file,
-                    redisClient,
                     socket,
                 );
             });
@@ -49,13 +42,13 @@ const shutdown = (io: any, redisClient: any) => {
             socket.on('connectWallet', async (...args) => {
                 const [deviceId] = args;
 
-                await S.connectWallet(deviceId, redisClient, socket);
+                await S.connectWallet(deviceId, socket);
             });
 
             socket.on('disconnectWallet', async (...args) => {
                 const [deviceId] = args;
 
-                await S.disconnectWallet(deviceId, redisClient, socket);
+                await S.disconnectWallet(deviceId, socket);
             });
         } catch(e) {
             console.log('a');
@@ -80,10 +73,10 @@ const shutdown = (io: any, redisClient: any) => {
         console.log(`Uncaught error: ${err}`);
     }).on('SIGTERM', async () => {
         console.info('SIGTERM. Closing process...');
-        shutdown(io, redisClient);
+        shutdown(io);
     }).on('SIGINT', async () => {
         console.info('SIGINT. Closing process...');
-        shutdown(io, redisClient);
+        shutdown(io);
     });
 
     console.log(`Socket server is started`);
