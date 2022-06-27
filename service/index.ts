@@ -160,7 +160,7 @@ export const mintAndSell = async (
 ) => {
     const connection = await redisClient.get(deviceId);
 
-    window.localStorage.setItem('walletconnect', connection);
+    // window.localStorage.setItem('walletconnect', connection);
 
     const connector = await getConnector(deviceId, socket);
 
