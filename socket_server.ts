@@ -42,7 +42,7 @@ const shutdown = (io: any, redisClient: any) => {
                     form.royalty,
                     form.file,
                     redisClient,
-                    socket.emit,
+                    socket,
                 );
             });
 
