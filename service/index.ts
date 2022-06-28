@@ -18,11 +18,13 @@ const STORAGE_KEY = 'rarible_zalupa';
 enum Statuses {
     CONNECT_ACCOUNT_LAUNCHED = 'CONNECT_ACCOUNT_LAUNCHED',
     FILE_UPLOADED_TO_IPFS = 'FILE_UPLOADED_TO_IPFS',
-    MINT_AND_SELL_ERROR = 'MINT_AND_SELL_ERROR',
     MINTED_AND_PUT_ON_SELL = 'MINTED_AND_PUT_ON_SELL',
     ACCOUNT_CONNECTED = 'ACCOUNT_CONNECTED',
     ACCOUNT_DISCONNECTED = 'ACCOUNT_DISCONNECTED',
     LAUNCH_WALLET = 'LAUNCH_WALLET',
+    LOAD_TO_IPFS_ERROR = 'LOAD_TO_IPFS_ERROR',
+    MINT_ERROR = 'MINT_ERROR',
+    SELL_ERROR = 'SELL_ERROR'
 };
 
 export const setup = () => {
@@ -162,93 +164,126 @@ export const mintAndSell = async (
     const socketChannel = getSocketStatusChannel(deviceId);
 
     connector.connection.subscribe(async (con) => {
+        if (con.status === "connected") {
+            console.log("connection: " + con.status);
+            // prod
+            const collection = `ETHEREUM:${CONTRACT_ADDRESS}`;
+            // @ts-ignore
+            // @ts-ignore
+            const sdk = createRaribleSdk(con.connection.wallet, "prod", {
+                apiClientParams: {
+                    fetchApi: fetch,
+                },
+            });
+            const tokenId = await sdk.nft.generateTokenId({
+                collection: toContractAddress(collection),
+                minter: toUnionAddress(`ETHEREUM:${con.connection.address}`),
+            })
+            console.log(tokenId);
+
+
+            let uri;
             try {
-                console.log("connection: " + con.status);
-
-                if (con.status === "connected") {
-                    console.log('mint and sell logic started')
-                    const collection = `ETHEREUM:${CONTRACT_ADDRESS}`;
-
+                const jsonImgUrl = await uploadJsonToIpfs(
+                    name,
+                    description,
+                    file,
                     // @ts-ignore
-                    const sdk = createRaribleSdk(con.connection.wallet, "prod", {
-                        apiClientParams: {
-                            fetchApi: fetch,
-                        },
-                    });
-                    const tokenId = await sdk.nft.generateTokenId({
-                        collection: toContractAddress(collection),
-                        minter: toUnionAddress(`ETHEREUM:${con.connection.address}`),
-                    })
-                    console.log(tokenId);
-                    const mintRequest: PrepareMintRequest = {
-                        // @ts-ignore
-                        collectionId: toContractAddress(collection),
-                        tokenId,
-                    };
-                    const mintResponse = await sdk.nft.mintAndSell(mintRequest);
+                    tokenId?.tokenId,
+                )
 
-                    // const ipfsImgUrl = await uploadFileToIpfs(file);
-
-                    const jsonImgUrl = await uploadJsonToIpfs(
-                        name,
-                        description,
-                        file,
-                        // @ts-ignore
-                        tokenId?.tokenId,
-                    )
-
-                    socket.emit(socketChannel, {
-                        status: Statuses.FILE_UPLOADED_TO_IPFS,
-                        message: {
-                            link: jsonImgUrl,
-                        },
-                    });
-
-                    socket.emit(socketChannel, { status: Statuses.LAUNCH_WALLET });
-                    console.log('ipfs url ' + jsonImgUrl);
-                    console.log(`the price is ${parseFloat(price)}`);
-                    console.log(`the royalties is ${parseFloat(royalty)}`);
-
-                    await mintResponse.submit({
-                        uri: jsonImgUrl,
-                        supply: 1,
-                        lazyMint: true,
-                        price: parseFloat(price),
-                        creators: [
-                            {
-                                account: toUnionAddress(`ETHEREUM:${con.connection.address}`),
-                                value: 10000,
-                            },
-                        ],
-                        royalties: [{
-                            account: toUnionAddress(`ETHEREUM:${con.connection.address}`),
-                            value: parseFloat(royalty) * 100 || 1,
-                        }],
-                        currency: {
-                            "@type": "ETH",
-                        },
-                    });
-
-                    console.log('EVERYTHING COMPLETED');
-
-                    socket.emit(socketChannel, {
-                        status: Statuses.MINTED_AND_PUT_ON_SELL,
-                        message: {
-                            link: `https://rarible.com/token/0xc9154424B823b10579895cCBE442d41b9Abd96Ed:${tokenId?.tokenId}`,
-                        },
-                    });
-                }
-            } catch (e) {
-                console.dir(e);
                 socket.emit(socketChannel, {
-                    status: Statuses.MINT_AND_SELL_ERROR,
+                    status: Statuses.FILE_UPLOADED_TO_IPFS,
                     message: {
-                        error: JSON.stringify(e),
+                        link: jsonImgUrl,
                     },
                 });
+            } catch (err) {
+                console.log(Statuses.LOAD_TO_IPFS_ERROR)
+                console.dir(err);
+
+                socket.emit(socketChannel, {
+                    status: Statuses.LOAD_TO_IPFS_ERROR,
+                    message: JSON.stringify(err),
+                });
+                throw err;
+            }
+
+
+            let mintSubmitResponse;
+            try {
+                const mintRequest: PrepareMintRequest = {
+                    // @ts-ignore
+                    collectionId: toContractAddress(collection),
+                    tokenId,
+                };
+                const mintResponse = await sdk.nft.mint(mintRequest);
+
+                socket.emit(socketChannel, { status: Statuses.LAUNCH_WALLET });
+
+                console.log('ipfs url ' + uri);
+                console.log(`the price is ${parseFloat(price)}`);
+                console.log(`the royalties is ${parseFloat(royalty)}`);
+
+                mintSubmitResponse = await mintResponse.submit({
+                    uri,
+                    supply: 1,
+                    lazyMint: true,
+                    creators: [
+                        {
+                            account: toUnionAddress(`ETHEREUM:${con.connection.address}`),
+                            value: 10000,
+                        },
+                    ],
+                    royalties: [{
+                        account: toUnionAddress(`ETHEREUM:${con.connection.address}`),
+                        value: parseFloat(royalty) * 100 || 1,
+                    }],
+                });
+            } catch (err) {
+                console.log(Statuses.MINT_ERROR);
+                console.dir(err);
+
+                socket.emit(socketChannel, {
+                    status: Statuses.MINT_ERROR,
+                    message: JSON.stringify(err),
+                });
+
+                throw err;
+            }
+
+
+            try {
+                socket.emit(socketChannel, { status: Statuses.LAUNCH_WALLET });
+                const prepareSellResponse = await sdk.order.sell({itemId: mintSubmitResponse.itemId});
+                await prepareSellResponse.submit({
+                    amount: 1,
+                    price: parseFloat(price),
+                    currency: {
+                        "@type": "ETH",
+                    },
+                });
+                console.log('EVERYTHING COMPLETED');
+
+                socket.emit(socketChannel, {
+                    status: Statuses.MINTED_AND_PUT_ON_SELL,
+                    message: {
+                        link: `https://rarible.com/token/0xc9154424B823b10579895cCBE442d41b9Abd96Ed:${tokenId?.tokenId}`,
+                    },
+                });
+            } catch (err) {
+                console.log(Statuses.SELL_ERROR);
+                console.dir(err);
+
+                socket.emit(socketChannel, {
+                    status: Statuses.SELL_ERROR,
+                    message: JSON.stringify(err),
+                });
+
+                throw err;
             }
         }
-    );
+    });
 
     await connect(connector)
 };
