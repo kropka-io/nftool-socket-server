@@ -1,12 +1,12 @@
 import fetch from 'node-fetch';
-import { Connector } from "@rarible/connector";
+import {Connector} from "@rarible/connector";
 import {WalletConnectConnectionProvider} from "@rarible/connector-walletconnect";
-import {toContractAddress, toUnionAddress } from "@rarible/types";
+import {toContractAddress, toUnionAddress} from "@rarible/types";
 import {PrepareMintRequest} from "@rarible/sdk/build/types/nft/mint/prepare-mint-request.type";
 import {mapEthereumWallet} from '@rarible/connector-helper';
 import {createRaribleSdk} from '@rarible/sdk';
 
-const { LocalStorage } = require('node-localstorage');
+const {LocalStorage} = require('node-localstorage');
 const FormData = require('form-data');
 
 const API_KEY = 'bd0d345d2b0565a670f5';
@@ -169,7 +169,6 @@ export const mintAndSell = async (
             // prod
             const collection = `ETHEREUM:${CONTRACT_ADDRESS}`;
             // @ts-ignore
-            // @ts-ignore
             const sdk = createRaribleSdk(con.connection.wallet, "prod", {
                 apiClientParams: {
                     fetchApi: fetch,
@@ -219,7 +218,7 @@ export const mintAndSell = async (
                 };
                 const mintResponse = await sdk.nft.mint(mintRequest);
 
-                socket.emit(socketChannel, { status: Statuses.LAUNCH_WALLET });
+                socket.emit(socketChannel, {status: Statuses.LAUNCH_WALLET});
 
                 console.log('ipfs url ' + jsonImgUrl);
                 console.log(`the price is ${parseFloat(price)}`);
@@ -254,7 +253,7 @@ export const mintAndSell = async (
 
 
             try {
-                socket.emit(socketChannel, { status: Statuses.LAUNCH_WALLET });
+                socket.emit(socketChannel, {status: Statuses.LAUNCH_WALLET});
                 const prepareSellResponse = await sdk.order.sell({itemId: mintSubmitResponse.itemId});
                 await prepareSellResponse.submit({
                     amount: 1,
@@ -282,6 +281,8 @@ export const mintAndSell = async (
 
                 throw err;
             }
+            console.log('localStorage after mint and sell');
+            console.dir(window.localStorage.getItem(`${STORAGE_KEY}_${deviceId}`))
         }
     });
 
@@ -322,10 +323,10 @@ export const uploadJsonToIpfs = async (name: string, description: string, imgUrl
         "description": description,
         "image": imgUrl,
         "external_url": `https://app.rarible.com/${CONTRACT_ADDRESS}:${tokenId}`,
-        "attributes":[{
-            "key":"Test",
-            "trait_type":"Test",
-            "value":"Test",
+        "attributes": [{
+            "key": "Test",
+            "trait_type": "Test",
+            "value": "Test",
         }]
     });
 
