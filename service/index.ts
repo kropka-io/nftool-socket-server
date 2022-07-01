@@ -5,6 +5,8 @@ import {toContractAddress, toUnionAddress} from "@rarible/types";
 import {PrepareMintRequest} from "@rarible/sdk/build/types/nft/mint/prepare-mint-request.type";
 import {mapEthereumWallet} from '@rarible/connector-helper';
 import {createRaribleSdk} from '@rarible/sdk';
+import sequelizeClient from "../utils/db";
+import SessionModel from "../models/sessions";
 
 const {LocalStorage} = require('node-localstorage');
 const FormData = require('form-data');
@@ -48,6 +50,8 @@ export const setup = () => {
     global.CustomEvent = function CustomEvent() {
         return;
     };
+
+    // sequelizeClient.query('SELECT 1').then(console.log);
 }
 
 export const getSocketStatusChannel = (deviceId: string): string => {
@@ -124,7 +128,12 @@ export const connectWallet = async (deviceId: string, socket: any) => {
             console.log("connection: " + con.status);
 
             if (con.status === "connected") {
-                console.log('local storage after connect' + JSON.stringify(window.localStorage.getItem(`${STORAGE_KEY}_${deviceId}`)))
+                const connString = JSON.stringify(window.localStorage.getItem(`${STORAGE_KEY}_${deviceId}`));
+                console.log('local storage after connect' + connString)
+                await SessionModel.create({
+                    device_id: deviceId,
+                    connection: connString
+                });
                 // window.localStorage.setItem('walletconnect', '');
 
                 socket.emit(socketChannel, {
@@ -142,6 +151,11 @@ export const connectWallet = async (deviceId: string, socket: any) => {
 
 export const disconnectWallet = async (deviceId: string, socket: any) => {
     window.localStorage.setItem(`${STORAGE_KEY}_${deviceId}`, '');
+    await SessionModel.destroy({
+        where: {
+            device_id: deviceId,
+        }
+    });
 
     const socketChannel = getSocketStatusChannel(deviceId);
 
