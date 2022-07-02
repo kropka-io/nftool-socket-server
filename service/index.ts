@@ -5,7 +5,6 @@ import {toContractAddress, toUnionAddress} from "@rarible/types";
 import {PrepareMintRequest} from "@rarible/sdk/build/types/nft/mint/prepare-mint-request.type";
 import {mapEthereumWallet} from '@rarible/connector-helper';
 import {createRaribleSdk} from '@rarible/sdk';
-import sequelizeClient from "../utils/db";
 import SessionModel from "../models/sessions";
 
 const {LocalStorage} = require('node-localstorage');
@@ -29,8 +28,17 @@ enum Statuses {
     SELL_ERROR = 'SELL_ERROR'
 };
 
-export const setup = () => {
-    // Setup
+export const setup = async () => {
+    const localStorage = new LocalStorage('./scratch');
+
+    const sessions = await SessionModel.findAll();
+
+    await Promise.all(sessions.map((session: any) => {
+        const { device_id, connection } = session;
+
+        localStorage.setItem(`${STORAGE_KEY}_${device_id}`, connection);
+    }))
+
     //@ts-ignore
     global.FormData = FormData;
     //@ts-ignore
@@ -39,7 +47,7 @@ export const setup = () => {
         fetch: fetch,
 
         //@ts-ignore
-        localStorage: new LocalStorage('./scratch'),
+        localStorage,
         //@ts-ignore
         dispatchEvent: () => {
         },

@@ -1,4 +1,4 @@
-// import Server from "socket.io";
+import 'dotenv/config'
 import * as S from './service';
 const Server = require('socket.io');
 
@@ -19,7 +19,7 @@ const shutdown = (io: any) => {
     // @ts-ignore
     const io = new Server(process.env.PORT || 3000, { /* options */ });
 
-    S.setup();
+    await S.setup();
 
     io.on("connection", async (socket) => {
         try {
