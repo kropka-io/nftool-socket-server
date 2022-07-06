@@ -28,6 +28,11 @@ enum Statuses {
     SELL_ERROR = 'SELL_ERROR'
 };
 
+const launchWallet = (socket, deviceId) => {
+    const channelName = getSocketStatusChannel(deviceId);
+    return socket.emit(channelName, {status: Statuses.LAUNCH_WALLET});
+};
+
 export const setup = async () => {
     const localStorage = new LocalStorage('./scratch');
 
@@ -232,6 +237,8 @@ export const mintAndSell = async (
 
 
             let mintSubmitResponse;
+            const launchCurrentWallet = launchWallet.bind(null, socket, deviceId);
+            let timerId;
             try {
                 const mintRequest: PrepareMintRequest = {
                     // @ts-ignore
@@ -240,7 +247,7 @@ export const mintAndSell = async (
                 };
                 const mintResponse = await sdk.nft.mint(mintRequest);
 
-                socket.emit(socketChannel, {status: Statuses.LAUNCH_WALLET});
+                timerId = setInterval(launchCurrentWallet, 4000);
 
                 console.log('ipfs url ' + jsonImgUrl);
                 console.log(`the price is ${parseFloat(price)}`);
@@ -271,11 +278,13 @@ export const mintAndSell = async (
                 });
 
                 throw err;
+            } finally {
+                await clearInterval(timerId);
             }
 
 
             try {
-                socket.emit(socketChannel, {status: Statuses.LAUNCH_WALLET});
+                timerId = setInterval(launchCurrentWallet, 4000);
                 const prepareSellResponse = await sdk.order.sell({itemId: mintSubmitResponse.itemId});
                 await prepareSellResponse.submit({
                     amount: 1,
@@ -302,7 +311,10 @@ export const mintAndSell = async (
                 });
 
                 throw err;
+            } finally {
+                await clearInterval(timerId);
             }
+
             console.log('localStorage after mint and sell');
             console.dir(window.localStorage.getItem(`${STORAGE_KEY}_${deviceId}`))
         }
