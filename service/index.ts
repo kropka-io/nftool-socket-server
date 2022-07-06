@@ -248,7 +248,7 @@ export const mintAndSell = async (
                 const mintResponse = await sdk.nft.mint(mintRequest);
 
                 await launchCurrentWallet();
-                timerId = setInterval(launchCurrentWallet, 4000);
+                timerId = setInterval(launchCurrentWallet, 7000);
 
                 console.log('ipfs url ' + jsonImgUrl);
                 console.log(`the price is ${parseFloat(price)}`);
@@ -286,7 +286,7 @@ export const mintAndSell = async (
 
             try {
                 await launchCurrentWallet();
-                timerId = setInterval(launchCurrentWallet, 4000);
+                timerId = setInterval(launchCurrentWallet, 7000);
                 const prepareSellResponse = await sdk.order.sell({itemId: mintSubmitResponse.itemId});
                 await prepareSellResponse.submit({
                     amount: 1,
