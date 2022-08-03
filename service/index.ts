@@ -6,6 +6,8 @@ import {PrepareMintRequest} from "@rarible/sdk/build/types/nft/mint/prepare-mint
 import {mapEthereumWallet} from '@rarible/connector-helper';
 import {createRaribleSdk} from '@rarible/sdk';
 import SessionModel from "../models/sessions";
+import fs from "fs";
+import axios from "axios";
 
 const {LocalStorage} = require('node-localstorage');
 const FormData = require('form-data');
@@ -210,7 +212,7 @@ export const mintAndSell = async (
 
             let jsonImgUrl;
             try {
-                jsonImgUrl = await uploadJsonToIpfs(
+                jsonImgUrl = await uploadJsonToRaribleIpfs(
                     name,
                     description,
                     file,
@@ -379,4 +381,42 @@ export const uploadJsonToIpfs = async (name: string, description: string, imgUrl
 
         return `ipfs://ipfs/${uri.IpfsHash}`;
     });
+}
+
+const uploadJsonToRaribleIpfs = async (name: string, description: string, imgUrl: string, tokenId: string) => {
+    const data = JSON.stringify({
+        "name": name,
+        "description": description,
+        "image": imgUrl,
+        "external_url": `https://app.rarible.com/${CONTRACT_ADDRESS}:${tokenId}`,
+        "attributes": [{
+            "key": "Test",
+            "trait_type": "Test",
+            "value": "Test",
+        }]
+    });
+
+    const form = new FormData();
+
+    const fileName = 'test.json';
+
+    form.append('file', new Blob([data], {type: 'text/json'}), fileName);
+
+
+    // rarible pinata
+    const response = await axios({
+        method: "post",
+        url: "https://pinata.rarible.com/upload",
+        data: form,
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
+
+
+    console.log('ended json upload to ipfs ')
+    console.log(response.data)
+
+    return `ipfs://ipfs/${response.data.IpfsHash}`
+
 }
