@@ -212,7 +212,7 @@ export const mintAndSell = async (
 
             let jsonImgUrl;
             try {
-                jsonImgUrl = await uploadJsonToRaribleIpfs(
+                jsonImgUrl = await uploadJsonToIpfs(
                     name,
                     description,
                     file,
