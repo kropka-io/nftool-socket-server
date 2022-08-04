@@ -11,6 +11,8 @@ import axios from "axios";
 
 const {LocalStorage} = require('node-localstorage');
 const FormData = require('form-data');
+import {Blob} from 'node:buffer';
+
 
 const API_KEY = 'bd0d345d2b0565a670f5';
 const SECRET_API_KEY = 'c07b7d17a545a96a7646a83a6459784afe97255027695b85f308b66721ad67f9';
@@ -212,7 +214,7 @@ export const mintAndSell = async (
 
             let jsonImgUrl;
             try {
-                jsonImgUrl = await uploadJsonToIpfs(
+                jsonImgUrl = await uploadJsonToRaribleIpfs(
                     name,
                     description,
                     file,
