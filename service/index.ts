@@ -402,7 +402,7 @@ const uploadJsonToRaribleIpfs = async (name: string, description: string, imgUrl
 
     const fileName = 'test.json';
 
-    form.append('file', new Blob([data], {type: 'text/json'}), fileName);
+    form.append('file', Buffer.from(data), fileName);
 
 
     // rarible pinata
