@@ -391,11 +391,7 @@ const uploadJsonToRaribleIpfs = async (name: string, description: string, imgUrl
         "description": description,
         "image": imgUrl,
         "external_url": `https://app.rarible.com/${CONTRACT_ADDRESS}:${tokenId}`,
-        "attributes": [{
-            "key": "Test",
-            "trait_type": "Test",
-            "value": "Test",
-        }]
+        "attributes": []
     });
 
     const form = new FormData();
@@ -403,7 +399,6 @@ const uploadJsonToRaribleIpfs = async (name: string, description: string, imgUrl
     const fileName = 'test.json';
 
     form.append('file', Buffer.from(data), fileName);
-
 
     // rarible pinata
     const response = await axios({
