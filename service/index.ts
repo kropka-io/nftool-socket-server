@@ -11,7 +11,7 @@ import axios from "axios";
 
 const {LocalStorage} = require('node-localstorage');
 const FormData = require('form-data');
-import {Blob} from 'node:buffer';
+import {Blob} from 'buffer';
 
 
 const API_KEY = 'bd0d345d2b0565a670f5';
